@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +34,9 @@ public class DoctorController {
 	@Autowired
 	private RestTemplate restTemplate;
 	
+	@Value("${patient.service.url}")
+	private String patientServiceUrl;
+	
 	private List<Speciality> specialities;
 	
 	@GetMapping("/count")
@@ -54,7 +58,7 @@ public class DoctorController {
 		Doctor doctor = doctorRepository.findById(doctorId, Doctor.class).orElse(new Doctor());
 		HashMap<String, String> uriVariables = new HashMap<String, String>();
 		uriVariables.put("id", doctor.getAssignedPatient().toString());
-		ResponseEntity<Patient> response = restTemplate.getForEntity("http://api-gateway/patients/{id}/basic-info", Patient.class, uriVariables);
+		ResponseEntity<Patient> response = restTemplate.getForEntity(patientServiceUrl + "/patients/{id}/basic-info", Patient.class, uriVariables);
 		DoctorDto result = this.convertEntityToDto(doctor);
 		result.setAssignedPatient(response.getBody());
 		return result;
