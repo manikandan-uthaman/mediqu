@@ -1,0 +1,355 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: common-config
+  labels:
+    app: hospital-dashboard
+data:
+  spring.datasource.url: <DATABASE_URL>
+  spring.datasource.username: <DATABASE_USERNAME>
+  patient.service.url: http://patient-service:8001/patient-app
+  doctor.service.url: http://doctor-service:8000/doctor-app
+  staff.service.url: http://staff-service:8002/staff-app
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: doctor-app
+  labels:
+    app: hospital-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: doctor-app
+  template:
+    metadata:
+      labels:
+        app: doctor-app
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: doctor-app
+        image: manikandan.azurecr.io/doctor-service:0.0.1
+        envFrom:
+          - configMapRef:
+              name: common-config
+        env:
+        - name: spring.datasource.password
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: password
+        ports:
+        - containerPort: 8000
+          name: doc-app-port
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: doctor-service
+  labels:
+    app: hospital-dashboard
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8000
+    targetPort: 8000
+  selector:
+    app: doctor-app
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: patient-app
+  labels:
+    app: hospital-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: patient-app
+  template:
+    metadata:
+      labels:
+        app: patient-app
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: patient-app
+        image: manikandan.azurecr.io/patient-service:0.0.1
+        envFrom:
+          - configMapRef:
+              name: common-config
+        env:
+        - name: spring.datasource.password
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: password
+        ports:
+        - containerPort: 8001
+          name: pat-app-port
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: patient-service
+  labels:
+    app: hospital-dashboard
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8001
+    targetPort: 8001
+  selector:
+    app: patient-app
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: appointment-app
+  labels:
+    app: hospital-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: appointment-app
+  template:
+    metadata:
+      labels:
+        app: appointment-app
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: appointment-app
+        image: manikandan.azurecr.io/appointment-service:0.0.1
+        envFrom:
+          - configMapRef:
+              name: common-config
+        env:
+        - name: spring.datasource.password
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: password
+        ports:
+        - containerPort: 8004
+          name: apnmt-app-port
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: appointment-service
+  labels:
+    app: hospital-dashboard
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8004
+    targetPort: 8004
+  selector:
+    app: appointment-app
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: general-app
+  labels:
+    app: hospital-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: general-app
+  template:
+    metadata:
+      labels:
+        app: general-app
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: general-app
+        image: manikandan.azurecr.io/general-service:0.0.1
+        envFrom:
+          - configMapRef:
+              name: common-config
+        env:
+        - name: spring.datasource.password
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: password
+        ports:
+        - containerPort: 8003
+          name: gnrl-app-port
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: general-service
+  labels:
+    app: hospital-dashboard
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8003
+    targetPort: 8003
+  selector:
+    app: general-app
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-app
+  labels:
+    app: hospital-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-app
+  template:
+    metadata:
+      labels:
+        app: notification-app
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: notification-app
+        image: manikandan.azurecr.io/notification-service:0.0.1
+        envFrom:
+          - configMapRef:
+              name: common-config
+        env:
+        - name: spring.datasource.password
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: password
+        ports:
+        - containerPort: 8005
+          name: ntf-app-port
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  labels:
+    app: hospital-dashboard
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8005
+    targetPort: 8005
+  selector:
+    app: notification-app
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: review-app
+  labels:
+    app: hospital-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: review-app
+  template:
+    metadata:
+      labels:
+        app: review-app
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: review-app
+        image: manikandan.azurecr.io/review-service:0.0.1
+        envFrom:
+          - configMapRef:
+              name: common-config
+        env:
+        - name: spring.datasource.password
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: password
+        ports:
+        - containerPort: 8006
+          name: rvw-app-port
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: review-service
+  labels:
+    app: hospital-dashboard
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8006
+    targetPort: 8006
+  selector:
+    app: review-app
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: staff-app
+  labels:
+    app: hospital-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: staff-app
+  template:
+    metadata:
+      labels:
+        app: staff-app
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: staff-app
+        image: manikandan.azurecr.io/staff-service:0.0.1
+        envFrom:
+          - configMapRef:
+              name: common-config
+        env:
+        - name: spring.datasource.password
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: password
+        ports:
+        - containerPort: 8002
+          name: rvw-app-port
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: staff-service
+  labels:
+    app: hospital-dashboard
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8002
+    targetPort: 8002
+  selector:
+    app: staff-app

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +30,12 @@ public class AppointmentController {
 	@Autowired
 	private RestTemplate restTemplate;
 	
+	@Value("${doctor.service.url}")
+	private String doctorServiceUrl;
+	
+	@Value("${patient.service.url}")
+	private String patientServiceUrl;
+	
 	@GetMapping
 	public List<AppointmentDto> getRecentAppointments(@RequestParam(name = "doctor", required = false) Integer doctorId, @RequestParam(name = "patient", required = false) Integer patientId) {
 
@@ -48,7 +55,8 @@ public class AppointmentController {
 		}
 		
 		StringBuilder sbr = new StringBuilder();
-		sbr.append("http://doctor-service/doctors?id=");
+		sbr.append(doctorServiceUrl);
+		sbr.append("/doctors?id=");
 		sbr.append(
 				appointments.stream().map(app -> String.valueOf(app.getDoctorId())).collect(Collectors.joining(","))
 		);
@@ -56,7 +64,8 @@ public class AppointmentController {
 		ResponseEntity<DoctorDto[]> doctors = restTemplate.getForEntity(sbr.toString(), DoctorDto[].class);
 
 		StringBuilder sb = new StringBuilder();
-		sb.append("http://patient-service/patients?id=");
+		sb.append(patientServiceUrl);
+		sb.append("/patients?id=");
 		sb.append(
 				appointments.stream().map(app -> String.valueOf(app.getPatientId())).collect(Collectors.joining(","))
 		);
